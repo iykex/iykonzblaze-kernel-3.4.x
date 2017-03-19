@@ -1,0 +1,27 @@
+UKM=/data/UKM;
+BB=$UKM/busybox;
+DEVICE=`sh $UKM/device/.device.sh`;
+
+case $1 in
+	enable)
+		$BB echo "0" > /sys/devices/virtual/android_usb/android0/enable;
+		$BB echo "1" > /sys/module/g_android/parameters/usb_keyboard;
+		$BB echo "1004" > /sys/class/android_usb/android0/idVendor;
+		$BB echo "61F9" > /sys/class/android_usb/android0/idProduct;
+		$BB echo "mtp,adb" > /sys/devices/virtual/android_usb/android0/functions;
+		$BB echo "1" > /sys/devices/virtual/android_usb/android0/enable;
+		sleep 1
+		$BB chown system.system /dev/hidg*;
+		$BB chmod 777 /dev/hidg*
+		$BB echo "USB Keyboard HID is enabled...";
+	;;
+	disable)
+		$BB echo "0" > /sys/devices/virtual/android_usb/android0/enable;
+		$BB echo "0" > /sys/module/g_android/parameters/usb_keyboard;
+		$BB echo "1004" > /sys/class/android_usb/android0/idVendor;
+		$BB echo "631F" > /sys/class/android_usb/android0/idProduct;
+		$BB echo "adb" > /sys/devices/virtual/android_usb/android0/functions;
+		$BB echo "1" > /sys/devices/virtual/android_usb/android0/enable;
+		$BB echo "USB Keyboard HID is disabled...";
+	;;
+esac;

@@ -1,0 +1,17 @@
+UKM=/data/UKM;
+BB=$UKM/busybox;
+
+MB=$2;
+PROFILE=$UKM/files/min_pressure;
+
+if [ -f $1 ]; then
+	if [[ ! -z $2 ]]; then
+		$BB echo $((MB / 4 * 1024)) > $1 2> /dev/null;
+		$BB echo $MB > $PROFILE;
+		$BB echo `$BB cat $PROFILE`;
+	else
+		$BB echo `$BB cat $PROFILE`;
+	fi;
+else
+	$BB echo "0";
+fi;

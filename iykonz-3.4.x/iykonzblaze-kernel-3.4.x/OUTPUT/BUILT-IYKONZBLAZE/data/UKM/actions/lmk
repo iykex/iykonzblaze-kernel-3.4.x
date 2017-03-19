@@ -1,0 +1,100 @@
+UKM=/data/UKM;
+BB=$UKM/busybox;
+
+P=/sys/module/lowmemorykiller/parameters/minfree;
+
+PERM=`$BB stat -c %a $P`;
+$BB test $PERM -lt "664" && $BB chmod 664 $P 2> /dev/null;
+
+#Read/Write
+read() {
+	VALUE=0;
+	NOW=`$BB cat $P`;
+	for LMK in ${NOW//,/ }; do
+		VALUE=$(($VALUE+1));
+		if [ "$VALUE" == $1 ]; then
+			$BB echo $((LMK / 256));
+			return
+		fi;
+	done;
+}
+
+write() {
+	SET=$2;
+	LMKARR="";
+	VALUE=0;
+	NOW=`$BB cat $P`;
+	for LMK in ${NOW//,/ }; do
+		VALUE=$(($VALUE+1));
+		if [ "$VALUE" == $1 ]; then
+			if [ "$VALUE" == 1 ]; then
+				LMKARR="$((SET * 256))";
+			else
+				LMKARR="$LMKARR $((SET * 256))";
+			fi;
+		else
+			if [ "$VALUE" == 1 ]; then
+				LMKARR="$LMK";
+			else
+				LMKARR="$LMKARR $LMK";
+			fi;
+		fi;
+	done;
+	$BB echo ${LMKARR// /,} > $P 2> /dev/null;
+}
+
+#Profiles
+Ultra_Low(){
+	MINFREE="1536,2048,2560,8192,16384,20480";
+	COST="64";
+}
+
+Low(){
+	MINFREE="12288,14336,18432,24576,27756,31744";
+	COST="48";
+}
+
+Medium(){
+	MINFREE="18432,23040,24576,28672,31744,34816";
+	COST="48";
+}
+
+Default(){
+	MINFREE="18432,23040,27648,32356,46080,51200";
+	COST="32";
+}
+
+LG_Stock(){
+	MINFREE="18432,23040,27648,32356,49152,61440";
+	COST="32";
+}
+
+Aggressive(){
+	MINFREE="18432,23040,27648,34816,51200,65536";
+	COST="16";
+}
+
+Exterminate(){
+	MINFREE="18432,23040,27648,53760,58880,65536";
+	COST="16";
+}
+
+if [ "$1" == "profile" ]; then
+	if [[ ! -z $2 ]]; then
+		$BB echo $2 > $UKM/files/lmk_prof;
+		
+		if [ $2 != "Custom" ]; then
+			$2;
+			$BB echo "$MINFREE" > $P;
+			$BB echo "$COST" > /sys/module/lowmemorykiller/parameters/cost;
+		fi;
+	fi;
+	
+	$BB echo `$BB cat $UKM/files/lmk_prof;`
+else
+	if [[ ! -z $2 ]]; then
+		write $1 $2;
+	fi;
+
+	$BB echo $(read $1);
+fi;

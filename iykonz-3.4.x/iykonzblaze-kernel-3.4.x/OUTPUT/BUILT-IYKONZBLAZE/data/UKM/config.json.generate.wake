@@ -1,0 +1,42 @@
+cat << CTAG
+{
+	name:WAKE,
+		elements:[
+			{ SPane:{
+				title:"Apply from init.d"
+			}},
+				{ SCheckBox:{
+					label:"Enable",
+					description:"This creates a init.d script for any of the following wake options. This resolves the unresponsive screen when the setting is enabled on boot and before the user interacts with the device. NOTE: Enable this option first then enable which wake option you want to apply on init.d script below.",
+					default:0,
+					action:"wake $UKM/files/wake_prof",
+				}},
+			`if [ -f "/sys/devices/virtual/input/lge_touch/touch_gesture" ]; then
+				$BB echo '{ SPane:{
+					title:"DoubleTap2Wake",
+					description:"If double tap to wake is not working, you can forcibly enable/disable it by pushing the buttons.",
+				}},
+					{ SButton:{
+						label:"Force DT2W",
+						action:"dt2w enable"
+					}},
+					{ SButton:{
+						label:"Unforce DT2W",
+						action:"dt2w disable"
+					}},'
+			fi`
+			`if [ -f "/sys/sweep2sleep/sweep2sleep" ]; then
+			S2S=\`$BB cat /sys/sweep2sleep/sweep2sleep\`
+				$BB echo '{ SPane:{
+					title:"Sweep2Sleep"
+				}},
+					{ SCheckBox:{
+						label:"Enable",
+						description:"Allows you to turn the screen off by swiping on the navigation bar.",
+						default:'$S2S',
+						action:"generic /sys/sweep2sleep/sweep2sleep"
+					}},'
+			fi`
+		]
+}
+CTAG

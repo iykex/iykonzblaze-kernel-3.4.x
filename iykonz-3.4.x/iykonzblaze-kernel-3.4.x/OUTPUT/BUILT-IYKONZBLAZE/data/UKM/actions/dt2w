@@ -1,0 +1,13 @@
+UKM=/data/UKM;
+BB=$UKM/busybox;
+
+case $1 in
+	enable)
+		$BB echo 1 > /sys/devices/virtual/input/lge_touch/touch_gesture;
+		$BB echo "Forcing DT2W...";
+	;;
+	disable)
+		$BB echo 0 > /sys/devices/virtual/input/lge_touch/touch_gesture;
+		$BB echo "Unforcing DT2W...";
+	;;
+esac;

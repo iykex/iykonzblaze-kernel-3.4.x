@@ -1,0 +1,26 @@
+######################################################################################################
+Using The Terminal/Still in Terminal:
+--------------------------------------
+
+ ---> {help you enter into iykonzblaze-kernel directory}
+Type :
+cd iykonz-3.4.x
+
+ Double click on [blaze.sh] & choose "Run in Terminal"-{only id your OS support}
+        or
+ use the build script "./blaze.sh" without ""quote
+
+ ****************
+
+NOTE:
+Before You Start Using The Custom Build Script-[blaze.sh], you may need to do the following :
+  ::: Use Properties,Under Permissions, check the | "[*]Allow executing file as a program" | -{root needed} :::
+
+
+ALSO DO THIS :
+** configure or cross-check /gcc $PATH
+ and it should like this {/home/user/arm-linux-androideabi-4.9/bin/arm-linux-androideabi-}
+
+
+$nana
+#########################################################################################################

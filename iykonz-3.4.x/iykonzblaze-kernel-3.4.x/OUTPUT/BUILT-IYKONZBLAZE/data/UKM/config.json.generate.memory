@@ -1,0 +1,235 @@
+cat << CTAG
+{
+    name:MEMORY,
+		elements:[
+			`if [ -f "/sys/block/zram0/disksize" ]; then
+			ZRAM=\`$BB cat /sys/block/zram0/disksize\`;
+			ZRAM=$((ZRAM / 1024 / 1024));
+			$BB echo '{ SPane:{
+				title:"Z-RAM",
+				description:"Z-RAM takes real device RAM and compresses it by 35-40% to create more free RAM using the LZ4 compressor. The more RAM is allocated to Z-RAM, the more physical RAM is freed at the cost of CPU usage."
+			}},
+				{ SSeekBar:{
+					title:"Size",
+					description:"Adjust size of the Z-RAM block at runtime. This will also set the maximum number of compression streams accordingly. NOTE: Setting the value to zero will turn off Z-RAM.",
+					unit:" MB",
+					step:256,
+					min:0,
+					max:1024,
+					default:'$ZRAM',
+					action:"zram /sys/block/zram0/disksize"
+				}},'
+			fi`
+			{ SPane:{
+				title:"Swap File",
+				description:"A swap file resides in the /data partition and can be used to extend the memory under some circumstances. Enable this only if you have available space in /data partition and if you really do need that RAM expansion. NOTE: Setting the value to zero will turn off the swap file and remote it."
+			}},
+				{ SSeekBar:{
+					title:"File Size",
+					description:"Adjust the size of the swap file at runtime. This file will be located at /data/swapfile. This can take up to two minutes, do not close the app.",
+					unit:" MB",
+					step:256,
+					min:0,
+					max:512,
+					default:0,
+					action:"swapfile /data/swapfile"
+				}},
+			{ SPane:{
+				title:"Virtual Memory",
+				description:"Tune the operation of the VM subsystem of the Linux kernel."
+			}},
+				{ SSeekBar:{
+					title:"Swappiness",
+					description:"Controls the tendency to move processes out of physical memory to the swap space and/or to the virtual compressed RAM (Z-RAM).",
+					unit:"%",
+					step:5,
+					min:30,
+					max:95,
+					default:`$BB cat /proc/sys/vm/swappiness`,
+					action:"generic /proc/sys/vm/swappiness"
+				}},
+				{ SSeekBar:{
+					title:"Dirty Background Ratio",
+					description:"Contains, as a % of total system memory, the number of pages at which the pdflush background writeback daemon will start writing out dirty data.",
+					unit:"%",
+					step:1,
+					min:0,
+					max:100,
+					default:`$BB cat /proc/sys/vm/dirty_background_ratio`,
+					action:"generic /proc/sys/vm/dirty_background_ratio"
+				}},
+				{ SSeekBar:{
+					title:"Dirty Ratio",
+					description:"Contains, as a % of total system memory, the number of pages at which a process which is generating disk writes will itself start writing out dirty data. Lower the amount of unwritten write cache to reduce lags when a huge write is required.",
+					unit:"%",
+					step:1,
+					min:0,
+					max:100,
+					default:`$BB cat /proc/sys/vm/dirty_ratio`,
+					action:"generic /proc/sys/vm/dirty_ratio"
+				}},
+				{ SOptionList:{
+					title:"Drop Caches (Clear VFS Cache After Boot)",
+					description:"This option will force rebuild of file system cache based on actual app usage rather than boot/startup processes. NOTE: This process can take from 1-2 minutes (Enable for better file system read/write performance).",
+					default:0,
+					action:"dropcaches $UKM/files/dropcaches_prof",
+					values:{ 0:"Disabled", 1:"Enabled"
+					}
+				}},
+				`if [ -f "/proc/sys/vm/extra_free_kbytes" ]; then
+					$BB echo '{ SSeekBar:{
+						title:"Extra Free Kilobytes",
+						description:"This option regulates the amount of memory that the kernel tries to keep free. A high value will reduce allocation time and cause LMK to kill earlier. A low value will delay memory allocations to block waiting for disk I/O to react.",
+						unit:" kB",
+						step:50,
+						min:0,
+						max:24300,
+						default:'\`$BB cat /proc/sys/vm/extra_free_kbytes\`',
+						action:"generic /proc/sys/vm/extra_free_kbytes"
+					}},'
+				fi`
+				{ SOptionList:{
+					title:"Laptop Mode (Auto FS Writeback Delay Mode)",
+					description:"This option will delay the writebacks of file system bits cached in RAM while screen is ON (Enable for better performance @ slight risk of possible data loss if crashed or sudden loss of power).",
+					default:`$BB cat /proc/sys/vm/laptop_mode`,
+					action:"generic /proc/sys/vm/laptop_mode",
+					values:{ 0:"Disabled", 1:"Enabled"
+					}
+				}},
+				{ SSeekBar:{
+					title:"VFS Cache Pressure",
+					description:"Controls the tendency of the kernel to reclaim the memory which is used for caching of directory and inode objects. Lower = prefer to retain dentry and inode cache, higher = prefer to reclaim dentry and inodes cache.",
+					unit:"%",
+					step:1,
+					min:0,
+					max:150,
+					default:`$BB cat /proc/sys/vm/vfs_cache_pressure`,
+					action:"generic /proc/sys/vm/vfs_cache_pressure"
+				}},
+				{ SSeekBar:{
+					title:"VM Heapsize",
+					description:"Set the maximum amount of heapsize (memory) a single instance of the Dalvik Virtual Machine (application) can obtain.",
+					unit:" MB",
+					min:-1,
+					max:1024,
+					step:1,
+					default:512,
+					action:"buildprop dalvik.vm.heapsize",
+				}},
+				{ SCheckBox:{
+					description:"Purging of bitmap memory assets allows the freeing of more RAM when needed.",
+					label:"Allow purging of assets",
+					default:0,
+					action:"buildprop persist.sys.purgeable_assets",
+				}},
+			`if [ -f "/sys/module/lowmemorykiller/parameters/minfree" ]; then
+				$BB echo '{ SPane:{
+					title:"Low Memory Killer",
+					description:"LMK minfree controls how much memory each app type can hold, and is responsible for memory management for multitasking. The more aggressive it is, the more RAM will be freed but more apps will be killed. Lower values will force LMK to let apps alive for more time at the cost of RAM usage, make sure you set a good amount of Z-RAM and/or swap to use those lower values."
+				}},
+					{ SOptionList:{
+						title:"LMK Profile",
+						description:"This option will auto-tune LMK minfree values as per selected profile.",
+						default:Medium,
+						action:"lmk profile",
+						values:[ Custom, Ultra_Low, Low, Medium, Default, LG_Stock, Aggressive, Exterminate,
+						],
+						notify:[
+								{
+									on:APPLY,
+									do:[ REFRESH, APPLY ],
+									to:[
+											"lmk 1",
+											"lmk 2",
+											"lmk 3",
+											"lmk 4",
+											"lmk 5",
+											"lmk 6"
+									],
+								}
+						]
+					}},'
+					for LMK in 1 2 3 4 5 6; do
+						$BB echo '{ SSeekBar:{ '
+							case $LMK in
+								1)
+									$BB echo 'title:"Foreground App", description:"The application currenty on the screen and running."' ;;
+								2)
+									$BB echo 'title:"Visible App", description:"The application that is open and running in background."' ;;
+								3)
+									$BB echo 'title:"Secondary Server", description:"This is a service an application needs that is alive and ready."' ;;
+								4)
+									$BB echo 'title:"Hidden App", description:"An idle process that wakes up on application request."' ;;
+								5)
+									$BB echo 'title:"Content Provider", description:"Apps that provide data (content) to the system."' ;;
+								6)
+									$BB echo 'title:"Empty App", description:"Apps closed by the user but ready to run."' ;;
+							esac
+						$BB echo ', action:"lmk '${LMK}'",
+						unit:"MB", min:1, max:300 }},'
+					done
+			fi`
+			`if [ -f "/sys/module/lowmemorykiller/parameters/vmpressure_file_min" ]; then
+				MIN=\`$BB cat $UKM/files/min_pressure\`
+					$BB echo '{ SSeekBar:{
+						title:"Minimum RAM",
+						description:"The minimum amount of free RAM needed for the kernel to start killing background processes.",
+						unit:" MB",
+						step:4,
+						min:260,
+						max:312,
+						default:'$MIN',
+						action:"min_pressure /sys/module/lowmemorykiller/parameters/vmpressure_file_min"
+					}},'
+			fi`
+			`if [ -f "/sys/module/lowmemorykiller/parameters/vm_pressure_adaptive_start" ]; then
+				ADAPT=\`$BB cat /sys/module/lowmemorykiller/parameters/vm_pressure_adaptive_start\`
+					$BB echo '{ SSeekBar:{
+						title:"Adaptive Start",
+						description:"The maximum limit for RAM pressure, when it reaches above this threshold, LMK will selectively start freeing RAM for bigger activies in cache to load.",
+						unit:"%",
+						step:1,
+						min:75,
+						max:94,
+						default:'$ADAPT',
+						action:"generic /sys/module/lowmemorykiller/parameters/vm_pressure_adaptive_start"
+					}},'
+			fi`
+			`if [ -f "/sys/module/lowmemorykiller/parameters/enable_adaptive_lmk" ]; then
+				AUTO=\`$BB cat /sys/module/lowmemorykiller/parameters/enable_adaptive_lmk\`
+				$BB echo '{ SPane:{
+					title:"Adaptive LMK",
+					description:"This LMK feature tends to increase responsiveness at the cost of reduced multitasking capabilities and battery life due to non-static killing of processes. It will be mostly noticible when running into a memory trashing condition, it is a great combo with higher LMK adaptive start pressure values, e.g. 85% to 94%."
+				}},
+					{ SCheckBox:{
+						label:"Enable",
+						default:'$AUTO',
+						action:"generic /sys/module/lowmemorykiller/parameters/enable_adaptive_lmk"
+					}},'
+			fi`
+			`if [ -f "/sys/module/process_reclaim/parameters/enable_process_reclaim" ]; then
+				REC=\`$BB cat /sys/module/process_reclaim/parameters/enable_process_reclaim\`
+				PRESS=\`$BB cat /sys/module/process_reclaim/parameters/pressure_max\`
+				$BB echo '{ SPane:{
+					title:"Process Reclaim",
+					description:"Works as a currency for the internal memory map, shrinking the RAM usage by background processes and allocating the free RAM to a new activity in the memory map. It also shrinks Z-RAM when the physical memory has enough space again, reducing CPU cycles on useless compressions."
+				}},
+					{ SCheckBox:{
+						label:"Enable",
+						default:'$REC',
+						action:"generic /sys/module/process_reclaim/parameters/enable_process_reclaim"
+					}},
+					{ SSeekBar:{
+						title:"Pressure",
+						description:"Setting higher pressure values will result in more efficient RAM allocation and therefore more RAM will be shrinked when bigger activies want space in RAM.",
+						unit:"%",
+						step:1,
+						min:75,
+						max:100,
+						default:'$PRESS',
+						action:"generic /sys/module/process_reclaim/parameters/pressure_max"
+					}},'
+			fi`
+		]
+}
+CTAG

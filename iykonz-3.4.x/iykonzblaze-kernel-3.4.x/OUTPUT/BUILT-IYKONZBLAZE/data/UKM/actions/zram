@@ -1,0 +1,38 @@
+UKM=/data/UKM;
+BB=$UKM/busybox;
+
+SWAP=/dev/block/zram0;
+RESET=/sys/block/zram0/reset;
+ZRAM=$2;
+
+if [ -f $1 ]; then
+	if [[ ! -z $2 ]]; then
+		$BB swapoff $SWAP > /dev/null 2>&1;
+		$BB echo "1" > $RESET;
+		
+		if [ $ZRAM -gt 0 ]; then
+			case $ZRAM in
+				1024)
+					$BB echo "4" > /sys/block/zram0/max_comp_streams;
+				;;
+				768)
+					$BB echo "3" > /sys/block/zram0/max_comp_streams;
+				;;
+				512)
+					$BB echo "2" > /sys/block/zram0/max_comp_streams;
+				;;
+				256)
+					$BB echo "1" > /sys/block/zram0/max_comp_streams;
+				;;
+			esac;
+			$BB echo $((ZRAM * 1024 * 1024)) > $1;
+			$BB mkswap $SWAP > /dev/null 2>&1;
+			$BB swapon $SWAP > /dev/null 2>&1;
+		fi;
+	fi;
+	
+	ZRAM=`$BB cat $1`;
+	$BB echo $((ZRAM / 1024 / 1024));
+else
+	$BB echo "0";
+fi;

@@ -1,0 +1,68 @@
+cat << CTAG
+{
+	name:STATUS,
+		elements:[
+			{ SPane:{
+				title:"Battery Temperature:"
+			}},
+				{ SLiveLabel:{
+					refresh:3000,
+					style:italic,
+					action:"live BatteryTemperature"
+				}},
+			{ SPane:{
+				title:"CPU Temperature:"
+			}},
+				{ SLiveLabel:{
+					refresh:3000,
+					style:italic,
+					action:"live CPUTemperature"
+				}},
+			{ SPane:{
+				title:"Memory:"
+			}},
+				{ SLiveLabel:{
+					refresh:3000,
+					style:italic,
+					action:"live Memory"
+				}},
+			{ SPane:{
+				title:"Uptime:"
+			}},
+				{ SLiveLabel:{
+					refresh:500,
+					style:italic,
+					action:"live UpTime"
+				}},
+			{ SPane:{
+				title:"CPU Unused States:"
+			}},
+				{ SLiveLabel:{
+					refresh:5000,
+					style:italic,
+					action:"live UnUsed"
+				}},
+			{ SPane:{
+				title:"CPU Time in States:"
+			}},
+				{ SLiveLabel:{
+					refresh:5000,
+					style:italic,
+					action:"live Time 0 9"
+				}},
+				{ SLiveLabel:{
+					refresh:5000,
+					style:italic,
+					action:"live Time 10 19"
+				}},
+			{ SPane:{
+				title:"Installation Check:"
+			}},
+				{ SLiveLabel:{
+					refresh:0,
+					style:italic,
+					action:"live InstallationCheck"
+				}},
+		]
+}
+CTAG

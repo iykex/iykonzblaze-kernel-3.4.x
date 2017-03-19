@@ -1,0 +1,62 @@
+UKM=/data/UKM;
+BB=$UKM/busybox;
+
+FILE=$1;
+SIZE=$2;
+PROFILE=$UKM/files/swapsize;
+
+if [ -f $FILE ]; then
+	if [[ ! -z $2 ]]; then
+		$BB swapoff $FILE > /dev/null 2>&1;
+		$BB rm $FILE;
+		
+		if [ $SIZE -gt 0 ]; then
+			case $SIZE in
+				512)
+					$BB dd if=/dev/zero of=$FILE bs=1024 count=524288 >/dev/null 2>&1;
+					$BB chown root:root $FILE;
+					$BB chmod 0600 $FILE;
+				;;
+				256)
+					$BB dd if=/dev/zero of=$FILE bs=1024 count=262144 >/dev/null 2>&1;
+					$BB chown root:root $FILE;
+					$BB chmod 0600 $FILE;
+				;;
+			esac;
+
+			$BB mkswap $FILE > /dev/null 2>&1;
+			$BB swapon $FILE > /dev/null 2>&1;
+		fi;
+
+		$BB echo $SIZE > $PROFILE;
+		$BB echo `$BB cat $PROFILE`;
+	else
+		$BB echo `$BB cat $PROFILE`;
+	fi;
+else
+	if [[ ! -z $2 ]]; then
+
+		if [ $SIZE -gt 0 ]; then
+			case $SIZE in
+				512)
+					$BB dd if=/dev/zero of=$FILE bs=1024 count=524288 >/dev/null 2>&1;
+					$BB chown root:root $FILE;
+					$BB chmod 0600 $FILE;
+				;;
+				256)
+					$BB dd if=/dev/zero of=$FILE bs=1024 count=262144 >/dev/null 2>&1;
+					$BB chown root:root $FILE;
+					$BB chmod 0600 $FILE;
+				;;
+			esac;
+
+			$BB mkswap $FILE > /dev/null 2>&1;
+			$BB swapon $FILE > /dev/null 2>&1;
+		fi;
+
+		$BB echo $SIZE > $PROFILE;
+		$BB echo `$BB cat $PROFILE`;
+	else
+		$BB echo `$BB cat $PROFILE`;
+	fi;
+fi;

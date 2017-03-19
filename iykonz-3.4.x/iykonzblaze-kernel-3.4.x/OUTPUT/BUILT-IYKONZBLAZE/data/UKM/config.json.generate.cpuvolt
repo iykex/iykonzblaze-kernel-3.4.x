@@ -1,0 +1,49 @@
+cat << CTAG
+{
+	name:CPU VOLT,
+		elements:[
+			`if [ -f "/sys/devices/system/cpu/cpu0/cpufreq/UV_mV_table" ]; then
+				$BB echo '{ STitleBar:{
+					title:"CPU Global Voltage"
+				}},
+					{ SSeekBar:{
+						default:0,
+						action:"voltage cpuvoltglobal global",
+						unit:" mV",
+						min:-300,
+						max:300,
+						step:5,
+						notify:[
+							{
+								on:APPLY,
+								do:[ REFRESH, APPLY ],
+								to:['
+									while read CPUFREQ VOLT UNIT; do
+										$BB echo '"voltage cpuvolt '$CPUFREQ'",';
+									done < /sys/devices/system/cpu/cpu0/cpufreq/UV_mV_table;
+								$BB echo ']
+							}
+						]
+					}},'
+			fi`
+			`if [ -f "/sys/devices/system/cpu/cpu0/cpufreq/UV_mV_table" ]; then
+				$BB echo '{ SPane:{
+					title:"CPU Frequency Voltage",
+					description:"Decreasing voltages will lower heat and power consumption of the CPU. Increasing it on overclocked frequencies improves stability. Too low voltages may cause instability and freezes."
+				}},'
+					while read CPUFREQ VOLT UNIT; do
+						$BB echo '{ SSeekBar:{
+							title:"'${CPUFREQ//mhz\:/}' MHz",
+							unit:"' ${UNIT}'",
+							min:465,
+							max:1450,
+							step:1,
+							default:'$VOLT',
+							action:"voltage cpuvolt '${CPUFREQ}'"
+						}},
+						';
+							done < /sys/devices/system/cpu/cpu0/cpufreq/UV_mV_table;
+			fi`
+		]
+}
+CTAG

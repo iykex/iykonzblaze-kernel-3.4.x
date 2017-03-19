@@ -1,0 +1,80 @@
+cat << CTAG
+{
+	name:SOUND,
+		elements:[
+			`if [ -d "/sys/kernel/sound_control_3" ]; then
+				$BB echo '{ SLiveLabel:{
+					refresh:0,
+					style:italic,
+					action:"$BB echo GPL Sound Control \`$BB cat /sys/kernel/sound_control_3/gpl_sound_control_version\`"
+				}},
+				{ SPane:{
+						title:"Sound Control API",
+						description:"Select the default API to control the GPL sound control driver."
+					}},
+						{ SOptionList:{
+							STC=\`$BB cat /sys/kernel/sound_control_3/lge_stweaks_control\`,
+							default:'$STC',
+							action:"generic /sys/kernel/sound_control_3/lge_stweaks_control",
+							values:{
+								0:"FauxSound", 1:"Synapse"
+							}
+						}},'
+			fi`
+			`if [ -f "/sys/kernel/sound_control_3/lge_headphone_gain" ]; then
+				$BB echo '{ SPane:{
+					title:"Synapse API Tuning",
+					description:"Tune sound control driver parameters using a free and open source API. There are no presets for this API, manual tuning is recommended. Some audio HALs might screw those settings on boot."
+				}},
+					{ SSeekBar:{
+						title:"Headphone Gain (Left & Right)",
+						description:"Tune the headphone left and right volume.",
+						step:1,
+						min:-30,
+						max:20,
+						default:-2,
+						action:"headphone_gain /sys/kernel/sound_control_3/lge_headphone_gain"
+					}},
+					{ SSeekBar:{
+						title:"Speaker Gain",
+						description:"Tune the general built-in speaker volume.",
+						step:1,
+						min:-15,
+						max:20,
+						default:0,
+						action:"speaker_gain /sys/kernel/sound_control_3/lge_speaker_gain"
+					}},
+					{ SSeekBar:{
+						title:"Microphone Gain",
+						description:"Tune the general microphone input volume.",
+						step:1,
+						min:-40,
+						max:24,
+						default:0,
+						action:"microphone_gain /sys/kernel/sound_control_3/lge_mic_gain"
+					}},
+					{ SSeekBar:{
+						title:"Camera Gain",
+						description:"Tune the microphone volume for camera video recording. NOTE: This channel may not have effect on non-LG camera app.",
+						step:1,
+						min:-40,
+						max:24,
+						default:0,
+						action:"microphone_gain /sys/kernel/sound_control_3/lge_cam_mic_gain"
+					}},'
+			fi`
+			`if [ -f "/sys/module/snd_soc_wcd9320/parameters/high_perf_mode" ]; then
+				HPM=\`$BB cat /sys/module/snd_soc_wcd9320/parameters/high_perf_mode\`;
+				$BB echo '{ SPane:{
+					title:"High Performance Mode",
+					description:"It will sound better at the cost of increasing CPU power and faster battery discharging while using FLAC or other lossless high bitrate audio files with frequency response higher than 44.1 kHz."
+				}},
+					{ SCheckBox:{
+						label:"Enable",
+						default:'$HPM',
+						action:"generic /sys/module/snd_soc_wcd9320/parameters/high_perf_mode",
+					}},'
+			fi`
+		]
+}
+CTAG

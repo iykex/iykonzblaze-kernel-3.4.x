@@ -1,0 +1,195 @@
+cat << CTAG
+{
+	name:ADVANCED,
+		elements:[
+			{ SPane:{
+				title:"Info"
+			}},
+				{ SDescription:{
+					description:"These options are for advanced users only, although anyone reading the descriptions carefully can obtain great results tuning those values. Proceed with caution..."
+				}},
+			{ SPane:{
+				title:"TCP Congestion Control"
+			}},
+				{ SOptionList:{
+					description:"Set the algorithm of internet congestion avoidance, to possibly improve speeds and load times. More info: <a href='https://en.wikipedia.org/wiki/TCP_congestion-avoidance_algorithm'>HERE</a>",
+					default:`$BB cat \`sh $DEVICE DirTCPCongestion\``,
+					action:"generic `sh $DEVICE DirTCPCongestion`",
+					values:[
+						`sh $DEVICE TCPCongestionList`
+					]
+				}},
+			`if [ -f "/sys/module/sync/parameters/fsync_enabled" ]; then
+			FSYNC=\`bool /sys/module/sync/parameters/fsync_enabled\`
+				$BB echo '{ SPane:{
+					title:"Filesystem Sync"
+				}},
+					{ SCheckBox:{
+						description:"Switcher for the filesystem operations, disabling it can increase speed at the cost of data integrity. Some kernels use asynchronous filesystem operations, so the speed gain when disabling may not even be noticeable.",
+						label:"Enable",
+						default:'$FSYNC',
+						action:"boolean /sys/module/sync/parameters/fsync_enabled"
+					}},'
+			fi`
+			`if [ -f "/sys/kernel/sched/arch_power" ]; then
+			GFS=\`$BB cat /sys/kernel/sched/arch_power\`
+				$BB echo '{ SPane:{
+					title:"Arch Power"
+				}},
+					{ SCheckBox:{
+						label:"Enable",
+						description:"Arch Power is used on ARM processors to force the scheduler to use the architecture power mode instead of the generic Linux kernel timers and ticks, sacrificing performance in favor of more energy savings.",
+						default:'$GFS',
+						action:"generic /sys/kernel/sched/arch_power"
+					}},'
+			fi`
+			`if [ -f "/sys/kernel/sched/gentle_fair_sleepers" ]; then
+			GFS=\`$BB cat /sys/kernel/sched/gentle_fair_sleepers\`
+				$BB echo '{ SPane:{
+					title:"Gentle Fair Sleepers"
+				}},
+					{ SCheckBox:{
+						label:"Enable",
+						description:"Sleeper Fairness is a concept used by CFS which treat sleeping/waiting tasks as if they were in a run queue. This implies tasks which spend most of the time waiting for an user input and such will get a fair share of CPU when they need it. Disabling this option can improve UI responsiveness.",
+						default:'$GFS',
+						action:"generic /sys/kernel/sched/gentle_fair_sleepers"
+					}},'
+			fi`
+			`if [ -f "/sys/kernel/fast_charge/force_fast_charge" ] && [ -f "/sys/kernel/fast_charge/fast_charge_level" ]; then
+			FC=\`$BB cat /sys/kernel/fast_charge/force_fast_charge\`
+			FCL=\`$BB cat /sys/kernel/fast_charge/fast_charge_level\`
+				$BB echo '{ SPane:{
+				title:"Dorimanx Fast Charger"
+				}},
+					{ SOptionList:{
+						title:"State",
+						description:"Do not forget to select USB connection method as charging before proceeding. Using MTP may slow down fast charge a little bit.",
+						default:'$FC',
+						action:"generic /sys/kernel/fast_charge/force_fast_charge",
+						values:{
+							0:"Disabled", 1:"Force AC", 2:"Custom"
+						}
+					}},
+					{ SSeekBar:{
+						title:"Fast Charger Levels",
+						description:"Warning: The incorrect usage of fast charge voltage can damage your phone or USB ports.",
+						default:'$FCL',
+						action:"force_fast_charge /sys/kernel/fast_charge/fast_charge_level",
+						values:{ 0:"Disabled",'
+							for CHARGE in \`$BB cat /sys/kernel/fast_charge/available_charge_levels\`; do
+								$BB echo "$CHARGE:\"${CHARGE} mA\", ";
+							done;
+						$BB echo '}
+					}},'
+			fi`
+			`if [ -f "/sys/module/sps_bam/parameters/allow_suspend" ]; then
+			MODEM_SLEEP=\`$BB cat /sys/module/sps_bam/parameters/allow_suspend\`
+				$BB echo '{ SPane:{
+					title:"LG Modem Deep-Sleep"
+				}},
+					{ SCheckBox:{
+						description:"Allows IRQ modem suspending to save power when data is enabled at the cost of delayed notifications. If you need instant notifications, disable it.",
+						label:"Enable",
+						default:'$MODEM_SLEEP',
+						action:"generic /sys/module/sps_bam/parameters/allow_suspend"
+					}},'
+			fi`
+			`if [ -f "/sys/devices/platform/tspdrv/nforce_timed" ]; then
+			VIBRATOR=\`$BB cat /sys/devices/platform/tspdrv/nforce_timed\`
+				$BB echo '{ SPane:{
+					title:"LG Vibrator Strength"
+				}},
+					{ SSeekBar:{
+						description:"Set the timed intensity of the tspdrv vibrator.",
+						step:1,
+						min:1,
+						max:127,
+						default:'$VIBRATOR',
+						action:"generic /sys/devices/platform/tspdrv/nforce_timed"
+					}},'
+			fi`
+			`if [ -f "/sys/module/wakeup/parameters/enable_si_ws" ]; then
+				WSI=\`bool /sys/module/wakeup/parameters/enable_si_ws\`;
+				$BB echo '{ SPane:{
+						title:"Wakelock Control",
+						description:"Wakelocks are power-managing software mechanisms, which make sure that your Android device does not go into deep sleep. Disabling wakelocks is not endorsed by the developer and can possibly cause issues, disable them at your own risk."
+					}},
+					{ SSpacer:{
+						height: 1
+					}},
+					{ SCheckBox:{
+						label:"Wakelock Enabled",
+						description:"If disabled skip - sensor_ind - (Proximity Sensor)",
+						default:'$WSI',
+						action:"boolean /sys/module/wakeup/parameters/enable_si_ws"
+					}},'
+			fi`
+			`if [ -f "/sys/module/wakeup/parameters/enable_msm_hsic_ws" ]; then
+				WHSIC=\`bool /sys/module/wakeup/parameters/enable_msm_hsic_ws\`;
+				$BB echo '{ SSpacer:{
+						height: 1
+					}},
+					{ SCheckBox:{
+						label:"Wakelock Enabled",
+						description:"If disabled skip - msm_hsic_ws - (Modem)",
+						default:'$WHSIC',
+						action:"boolean /sys/module/wakeup/parameters/enable_msm_hsic_ws"
+					}},'
+			fi`
+			`if [ -f "/sys/module/wakeup/parameters/enable_wlan_wake_ws" ]; then
+				WWWKE=\`bool /sys/module/wakeup/parameters/enable_wlan_wake_ws\`;
+				$BB echo '{ SCheckBox:{
+						label:"Wakelock Enabled",
+						description:"If disabled skip - wlan_wake - (Wifi)",
+						default:'$WWWKE',
+						action:"boolean /sys/module/wakeup/parameters/enable_wlan_wake_ws"
+					}},'
+			fi`
+			`if [ -f "/sys/module/wakeup/parameters/enable_wlan_rx_wake_ws" ]; then
+				WWRX=\`bool /sys/module/wakeup/parameters/enable_wlan_rx_wake_ws\`;
+				$BB echo '{ SSpacer:{
+						height: 1
+					}},
+					{ SCheckBox:{
+						label:"Wakelock Enabled",
+						description:"If disabled skip - wlan_rx - (Wifi)",
+						default:'$WWRX',
+						action:"boolean /sys/module/wakeup/parameters/enable_wlan_rx_wake_ws"
+					}},'
+			fi`
+			`if [ -f "/sys/module/bcmdhd/parameters/wlrx_divide" ]; then
+				WWLRX=\`$BB cat /sys/module/bcmdhd/parameters/wlrx_divide\`;
+				$BB echo '{ SSeekBar:{
+						title:"Only If Enabled",
+						description:"We can control and reduced wakelock by dividing the timeout.",
+						min:1,
+						max:8,
+						step:1,
+						default:'$WWLRX',
+						action:"generic /sys/module/bcmdhd/parameters/wlrx_divide"
+					}},'
+			fi`
+			`if [ -f "/sys/module/wakeup/parameters/enable_wlan_ctrl_wake_ws" ]; then
+				WWCTRL=\`bool /sys/module/wakeup/parameters/enable_wlan_ctrl_wake_ws\`;
+				$BB echo '{ SCheckBox:{
+						label:"Wakelock Enabled",
+						description:"If disabled skip - wlan_ctrl - (Wifi)",
+						default:'$WWCTRL',
+						action:"boolean /sys/module/wakeup/parameters/enable_wlan_ctrl_wake_ws"
+					}},'
+			fi`
+			`if [ -f "/sys/module/bcmdhd/parameters/wlctrl_divide" ]; then
+				WWLCTRL=\`$BB cat /sys/module/bcmdhd/parameters/wlctrl_divide\`;
+				$BB echo '{ SSeekBar:{
+						title:"Only if Enabled",
+						description:"We can control and reduced wakelock by dividing the timeout.",
+						min:1,
+						max:8,
+						step:1,
+						default:'$WWLCTRL',
+						action:"generic /sys/module/bcmdhd/parameters/wlctrl_divide"
+					}},'
+			fi`
+		]
+}
+CTAG

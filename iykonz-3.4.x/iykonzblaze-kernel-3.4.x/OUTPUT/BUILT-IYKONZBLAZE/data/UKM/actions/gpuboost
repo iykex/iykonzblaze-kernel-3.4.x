@@ -1,0 +1,25 @@
+UKM=/data/UKM;
+BB=$UKM/busybox;
+DEVICE=`sh $UKM/device/.device.sh`;
+
+case $1 in
+	enable)
+		$BB echo 3 > /sys/devices/fdb00000.qcom,kgsl-3d0/kgsl/kgsl-3d0/min_pwrlevel;
+		$BB echo "0" > /sys/module/adreno_idler/parameters/adreno_idler_active;
+		$BB echo "3" > /sys/module/simple_gpu_algorithm/parameters/simple_laziness;
+		$BB echo "6000" > /sys/module/simple_gpu_algorithm/parameters/simple_ramp_threshold;
+		$BB echo "1" > /sys/module/simple_gpu_algorithm/parameters/simple_gpu_activate;
+		$BB echo "GPU boosting enabled...";
+	;;
+	disable)
+		$BB echo 5 > /sys/devices/fdb00000.qcom,kgsl-3d0/kgsl/kgsl-3d0/min_pwrlevel;
+		$BB echo "0" > /sys/module/simple_gpu_algorithm/parameters/simple_gpu_activate;
+		$BB echo "2" > /sys/module/simple_gpu_algorithm/parameters/simple_laziness;
+		$BB echo "7000" > /sys/module/simple_gpu_algorithm/parameters/simple_ramp_threshold;
+		$BB echo "2500" > /sys/module/adreno_idler/parameters/adreno_idler_idleworkload;
+		$BB echo "100" > /sys/module/adreno_idler/parameters/adreno_idler_idlewait;
+		$BB echo "50" > /sys/module/adreno_idler/parameters/adreno_idler_downdifferential;
+		$BB echo "1" > /sys/module/adreno_idler/parameters/adreno_idler_active;
+		$BB echo "GPU boosting disabled...";
+	;;
+esac;

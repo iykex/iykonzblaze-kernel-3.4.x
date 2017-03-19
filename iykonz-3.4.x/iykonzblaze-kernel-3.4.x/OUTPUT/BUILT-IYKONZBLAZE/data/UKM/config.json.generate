@@ -1,0 +1,51 @@
+UKM=/data/UKM;
+BB=$UKM/busybox;
+DEVICE=`sh $UKM/device/.device.sh`;
+
+bool() {
+  [ `$BB cat $1` == "Y" ] && $BB echo "1";
+  [ `$BB cat $1` == "N" ] && $BB echo "0";
+}
+
+cat << CTAG
+{
+    sections: [
+		`if [ -n "$DEVICE" ]; then
+			. $UKM/config.json.generate.info
+			# Needs to add support for action inside description first.
+			#$BB echo ','
+			#. $UKM/config.json.generate.changelog
+			$BB echo ','
+			. $UKM/config.json.generate.status
+			$BB echo ','
+			. $UKM/config.json.generate.cpu
+			$BB echo ','
+			. $UKM/config.json.generate.hotplug
+			$BB echo ','
+			. $UKM/config.json.generate.thermal
+			$BB echo ','
+			. $UKM/config.json.generate.io
+			$BB echo ','
+			. $UKM/config.json.generate.gpu
+			$BB echo ','
+			. $UKM/config.json.generate.gamma
+			$BB echo ','
+			. $UKM/config.json.generate.memory
+			$BB echo ','
+			. $UKM/config.json.generate.sound
+			$BB echo ','
+			. $UKM/config.json.generate.wake
+			$BB echo ','
+			. $UKM/config.json.generate.advanced
+			$BB echo ','
+			. $UKM/config.json.generate.mods
+			$BB echo ','
+			. $UKM/config.json.generate.tools
+			$BB echo ','
+			. $UKM/config.json.generate.profile
+		else
+			. $UKM/config.json.generate.error
+		fi`
+    ]
+}
+CTAG

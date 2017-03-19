@@ -1,0 +1,27 @@
+UKM=/data/UKM;
+BB=$UKM/busybox;
+
+if [ -f $1 ]; then
+	if [[ ! -z "$2" ]]; then
+		VOL_L=$2;
+		VOL_R=$2;
+
+		if [ "$2" -lt 0 ]; then
+			VOL_L=$(($2 + 256));
+			VOL_R=$(($2 + 256));
+		fi;
+
+		$BB echo "$VOL_L" "$VOL_R" > $1;
+	fi;
+
+	PATH=$1;
+	C=`while read V1 V2; do echo $V1; done < $PATH`;
+
+	if [ "$C" -gt 200 ]; then
+		C=$((C - 256));
+
+		$BB echo "$C";
+	else
+		$BB echo "$C";
+	fi;
+fi;

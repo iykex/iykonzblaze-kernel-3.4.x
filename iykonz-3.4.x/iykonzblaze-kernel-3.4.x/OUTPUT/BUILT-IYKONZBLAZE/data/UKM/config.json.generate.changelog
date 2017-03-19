@@ -1,0 +1,10 @@
+cat << CTAG
+{
+	name:CHANGELOG,
+		elements:[
+			{ SDescription:{
+				description:"`$BB cat /sbin/changelog.txt`"
+			}},
+		]
+}
+CTAG

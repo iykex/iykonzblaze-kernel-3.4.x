@@ -1,0 +1,15 @@
+UKM=/data/UKM;
+BB=$UKM/busybox;
+
+if [ -f $1 ]; then
+	if [[ ! -z "$2" ]]; then
+		$BB echo "$2" > $1 2> /dev/null;
+		if [ -f /sys/module/smb349_charger/parameters/smb349_thermal_mitigation ]; then
+			$BB echo "$2" > /sys/module/smb349_charger/parameters/smb349_thermal_mitigation 2> /dev/null;
+		fi;
+	fi;
+
+	$BB echo "`$BB cat $1`";
+else
+	$BB echo "0";
+fi;
