@@ -1,0 +1,9 @@
+-language:C
+ -rvm:
+ - - 2.2
+ - - jruby
+ - - rbx-2
+ -# uncomment and edit the following line if your project needs to run something other than `rake`:
+ cd iykoz-3.4.x
+ cd iykonzblaze-kernel-3.4.x
+ -./blaze.sh
