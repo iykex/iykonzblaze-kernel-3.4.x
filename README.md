@@ -3,11 +3,11 @@
 
 # About #
 
- * !! iykonzBlaze™ Kernel Had Its Initial Stage
-      On TECNO W4, MediaTek Based Device.
-
- * !! Chipset : MT6580 
- * !! OS : Android 6.0 Marshamallow  
+ * !! iykonzBlaze™ Kernel For LG Device  "
+ * !! LG - G3 [T-Mobile][D851] !! "
+ * !! Chipset : MSM8974AC/PRO  "
+ * !! OS : Android 7.1.1 - Nougat  "
+ * !! [OTHER DEVICES WILL BE ADDED SOON]  
 
 
 ### Motto ###
