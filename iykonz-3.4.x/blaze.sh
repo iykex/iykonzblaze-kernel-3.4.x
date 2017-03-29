@@ -18,19 +18,19 @@ printf '\e[8;40;60t]'
   clear
   echo
   echo
-cecho C "" "================================="
- echo "================================="
-cecho P "" "================================="
-cecho Y ""  " **ANDROID MATRIX DEVELOPMENT**"
-cecho C ""  "*MediaTek & Qualcomm Snapdragon*"
- echo "================================="
- cecho Y "" "================================="
+cecho C ""     "================================="
+ echo     "================================="
+cecho P ""     "================================="
+cecho Y ""      " **ANDROID MATRIX DEVELOPMENT**"
+cecho C ""      "*MediaTek & Qualcomm Snapdragon*"
+ echo     "================================="
+ cecho Y ""     "================================="
  
-echo "========*****************========"   
-cecho G ""  "  ---> DroidPeepz™ Inc    "
-cecho C "" "  ---> iykonzBlaze™ Kernel   "
-cecho P ""  "  ---> by : Nana Iyke Quame   "
-echo "========*****************========"
+echo     "========*****************========"   
+cecho G ""      "  ---> DroidPeepz™ Inc    "
+cecho C ""      "  ---> iykonzBlaze™ Kernel   "
+cecho P ""      "  ---> by : Nana Iyke Quame   "
+echo     "========*****************========"
   cecho B "" "    Menu"    "  || "$(date +%b-%d-%Y-%H:%M)''
   echo
    cecho P "    a - " "About !"
@@ -47,6 +47,9 @@ echo "========*****************========"
   echo
   cecho R "    x - " "Exit"
   echo
+  echo
+  echo
+  echo
 }
 
  #MENU
@@ -56,7 +59,7 @@ do
 
   clear
   START
-   read -p "           Enter option: " CHOICE
+  read -p "           Enter option: " CHOICE
   case "$CHOICE" in
        A|a) ABT;;   #DONE
        R|r) refresh;;     #REFRESH
@@ -110,11 +113,26 @@ START " "
 ABT(){
 clear
 echo
-cecho C "" "  !! iykonzBlaze™ Kernel Had Its Initial Stage
-      On TECNO W4, MediaTek Based Device !!"
 echo
-cecho C "" "  !! Chipset : MT6580!! "
-cecho C "" "  !! OS : Android 6.0 Marshamallow !! "
+echo
+cecho C "" "  !! iykonzBlaze™ Kernel Had Its Initial Stage
+      On TECNO W4, MediaTek Based Device "
+echo
+cecho C "" "  !! Chipset : MT6580  "
+cecho C "" "  !! OS : Android 6.0 Marshamallow  "
+echo
+cecho G "" "============================="
+echo
+cecho C "" "  !! Now It Has Been Ported To LG Device  "
+cecho C "" "  !! LG - G3 [T-Mobile][D851] !! "
+echo
+cecho C "" "  !! Chipset : MSM8974AC/PRO  "
+cecho C "" "  !! OS : Android 7.1.1 - Nougat  "
+echo
+echo
+cecho C "" "  !! [OTHER DEVICES WILL BE ADDED SOON]   "
+echo
+echo
 sleep 3.0;
 START " "
 }                                                        
@@ -219,13 +237,12 @@ then
     echo
     cecho R "" "BUILD ERRORS!"
 else
-    echo 'Moving kernel...'
-    cd OUTPUT
-    BUILT-IYKONZBLAZE
-    
-    cp OUTPUT/arch/arm/boot/Image $(pwd)/arch/arm/boot/zImage
-
-    cd ..
+    echo
+    echo
+    cecho B ""  'Making Device Tree BInary file & Moving Kernel...'
+    echo
+    echo -e "                        \033[0;34m "
+    echo
     chmod 777 cm-dt/dtbToolCM
     cm-dt/dtbToolCM -2 -o OUTPUT/arch/arm/boot/dt.img -s 2048 -p OUTPUT/scripts/dtc/ OUTPUT/arch/arm/boot/
     
@@ -236,8 +253,11 @@ else
     echo ""
     echo ""
     cecho G "" "Putting iykonzBlaze™ Kernel in Recovery Flashable Zip"
+    echo
+    echo
     cd OUTPUT
     cd BUILT-IYKONZBLAZE
+    echo -e "                        \033[0;33m "
     zip -r9 iykonzblaze-Kernel-LOS14.1-V1.2-D851-$(date +%b-%d-%Y-%H:%M).zip * -x iykonzblaze-Kernel-LOS14.1-V1.2-D851-$(date +%b-%d-%Y-%H:%M).zip
 
     cd ..
