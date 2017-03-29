@@ -56,7 +56,7 @@ do
 
   clear
   START
-  read -p "Enter option: " CHOICE
+   read -p "           Enter option: " CHOICE
   case "$CHOICE" in
        A|a) ABT;;   #DONE
        R|r) refresh;;     #REFRESH
