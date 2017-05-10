@@ -1,0 +1,3 @@
+language: c
+cd iykonz-3.4.x
+script: blaze.sh
